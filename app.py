@@ -21,5 +21,5 @@ def validate():
 def magiclink(uuid):
 	resp = redirect(request.query_string)
 	token = acmjwt.create_token({"x500":"goess006"}, secret)
-	resp.set_cookie("jwtauth", token, domain=".acm.umn.edu", max_age=LIFETIME)
+	resp.set_cookie("jwtauth", token, domain=".acm.umn.edu", max_age=LIFETIME, secure=True)
 	return resp
