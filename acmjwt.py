@@ -30,7 +30,7 @@ class AuthServer:
 		}
 		return JWT().encode({"alg": ALGORITHM}, payload, self.secret).decode("ascii")
 
-	def validate_raw_token(self, data, allowed_sources):
+	def validate_token(self, data, allowed_sources=[ISS_WEBLINK, ISS_CONSOLE]):
 		claims = JWT().decode(data, self.secret, claims_options={
 			"iss": {
 				"essential": True,
@@ -42,15 +42,3 @@ class AuthServer:
 
 	def issue_member_token(self, userid, source=ISS_WEBLINK, extra={}):
 		return self.issue_raw_token({"type":TYPE_MEMBER, "id":userid, **extra}, source)
-
-	def validate_member_token(self, token):
-		t = self.validate_raw_token(token, [ISS_WEBLINK, ISS_CONSOLE])
-		if t["type"] != TYPE_MEMBER:
-			raise ValueError("This is not a member token")
-		return t
-
-	def validate_service_token(self, token):
-		t = self.validate_raw_token(token, [ISS_CONSOLE])
-		if t["type"] != TYPE_SERVICE:
-			raise ValueError("This is not a service token")
-		return t

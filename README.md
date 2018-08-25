@@ -3,17 +3,17 @@
 URL Structure
 -------------
 
-### POST `/validate/member`
+### POST `/validate`
 
-Validate a JWT for a member.
+Validate a JWT.
 Submit with JWT as data.
-Responds with a JSON object containing the fields `ok` (boolean) and `token` (an object containing the JWT's claims).
+If Valid, responds with 200 and the claims object as JSON. Otherwise, responds with 403.
 
-### POST `/validate/service`
+### POST `/validate_service`
 
-Validate a JWT for a service.
+Validate a JWT for a service. Requires that the JWT was issued from the console and that it's `type` is that of a service token.
 Submit with JWT as data.
-Responds with a JSON object containing the fields `ok` (boolean) and `token` (an object containing the JWT's claims).
+If Valid, responds with 200 and the claims object as JSON. Otherwise, responds with 403.
 
 ### GET `/magiclink/<uuid>?<redir>`
 
