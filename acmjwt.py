@@ -42,3 +42,8 @@ class AuthServer:
 
 	def issue_member_token(self, userid, source=ISS_WEBLINK, extra={}):
 		return self.issue_raw_token({"type":TYPE_MEMBER, "id":userid, **extra}, source)
+
+if __name__=="__main__":
+	print("Issuing a service token...")
+	jwtsrv = AuthServer(input("Secret: "))
+	print(jwtsrv.issue_raw_token({"type":TYPE_SERVICE, "name":input("Service Name: ")}, ISS_CONSOLE))
