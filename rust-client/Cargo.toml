@@ -1,7 +1,8 @@
 [package]
+authors = ["Nathan Ringo <remexre@gmail.com>"]
+description = "A Rust client for the identity service."
 name = "acmumn-identity-client"
 version = "0.1.0"
-authors = ["Nathan Ringo <remexre@gmail.com>"]
 
 [dependencies]
 failure = "0.1.2"

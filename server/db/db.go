@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
+	uuid "github.com/satori/go.uuid"
 )
 
 type DB struct {
@@ -30,4 +31,15 @@ func (db *DB) Close() error {
 	}
 
 	return nil
+}
+
+// GetMemberIDAndEmail returns the id and email corresponding to the given X.500.
+func (db *DB) GetMemberIDAndEmailFromX500(x500 string) (uint, string, error) {
+	panic("TODO")
+}
+
+// NewLoginUUID creates a new login UUID for the member with the given ID, registers it with the
+// database, and returns it.
+func (db *DB) NewLoginUUID(member uint) (uuid.UUID, error) {
+	panic("TODO")
 }

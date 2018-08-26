@@ -1,3 +1,4 @@
+//! A Rust client for the identity service.
 #[macro_use]
 extern crate failure;
 extern crate futures;
