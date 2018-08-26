@@ -1,4 +1,4 @@
-authserver
-==========
+identity
+========
 
-The ACM UMN authentication microservice.
+The ACM UMN identity service.

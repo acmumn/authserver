@@ -1,20 +1,68 @@
-# authserver
+Identity Server
+===============
+
+Configuration
+-------------
+
+Configured via either environment variables or a `.env` file. The following environment variables are used:
+
+```
+# Required
+AUTH_SECRET="hunter2" # HS512 secret
+BASE_URL="https://auth.acm.umn.edu" # Base URL for magic links
+DATABASE_URL="mysql://root:password@localhost/acm" # MySQL database URL
+GIN_MODE="release" # Set to enable Gin's release mode
+
+# Optional
+HOST="" # IP to bind to
+PORT=8000 # Port to serve unsub links and template examples on
+SYSLOG_SERVER="" # If non-empty, the syslog server to send logs to
+```
 
 URL Structure
 -------------
 
+### GET `/`
+
+Serves a web form for a user to request to be mailed a "magic link." If the `redirect` query parameter is present, the magic link will redirect to it.
+
+### GET `/login/<uuid>`
+
+If the UUID is valid, invalidates it and issues an authentication token via the `auth` cookie and responds with status `303` with the `Location` set to either `acm.umn.edu` or the `redirect` query parameter, if present.
+
+If the UUID is not valid, responds with status `404` and a web page asking the user to try again.
+
 ### POST `/validate`
 
-Validate a JWT.
-Submit with JWT as data.
-If Valid, responds with 200 and the claims object as JSON. Otherwise, responds with 403.
+Requires a service authentication token.
 
-### POST `/validate_service`
+Validates the authentication token given as the (`text/plain`) body. If the token is valid, responds with status `200` and an object like one of the following:
 
-Validate a JWT for a service. Requires that the JWT was issued from the console and that it's `type` is that of a service token.
-Submit with JWT as data.
-If Valid, responds with 200 and the claims object as JSON. Otherwise, responds with 403.
+```json
+{ "iat": 1535259626
+, "exp": 1566795651
+, "type": "member"
+, "id": 12
+, "name": "Example Jones"
+, "x500": "jones132"
+, "card": "01234567890123456"
+, "email": "jones132@umn.edu"
+, "admin": false
+, "paid": true
+}
 
-### GET `/magiclink/<uuid>?<redir>`
+{ "iat": 1535259881
+, "exp": 1566795879
+, "type": "service"
+, "name": "devnull-as-a-service"
+}
+```
 
-If the UUID is present in the `jwt_escrow` table, it removes it, issues a JWT as a cookie for `.acm.umn.edu` and redirects to the redirect URL.
+If the token is not valid, responds with status `400` and an object like the following:
+
+```json
+{ "type": "expired" }
+{ "type": "invalid" }
+```
+
+If the service authentication token provided is invalid, responds with status 403.
