@@ -21,7 +21,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	// Gin appears not to pick up on its mode when the GIN_MODE env var is loaded via godotenv...
@@ -146,9 +146,7 @@ func loadTemplates(baseURL string) (*template.Template, error) {
 		return nil, err
 	}
 
-	baseTemplate := string(Assets.Files["/assets/base.html"].Data)
-
-	t := template.Must(template.New("").Funcs(template.FuncMap{
+	t := template.New("").Funcs(template.FuncMap{
 		"RelativeURL": func(rhs string) (string, error) {
 			rhsURL, err := url.Parse(rhs)
 			if err != nil {
@@ -157,11 +155,10 @@ func loadTemplates(baseURL string) (*template.Template, error) {
 
 			return base.ResolveReference(rhsURL).String(), nil
 		},
-	}).Parse(baseTemplate))
+	})
 	for _, name := range []string{"error", "get-index", "post-index"} {
 		data := string(Assets.Files[fmt.Sprintf("/assets/%s.html", name)].Data)
-		fmt.Println(name, data)
-		template.Must(template.Must(t.New(name).Parse(baseTemplate)).Parse(data))
+		template.Must(t.New(name).Parse(data))
 	}
 
 	return t, nil

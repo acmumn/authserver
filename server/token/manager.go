@@ -16,6 +16,8 @@ func NewManager(authSecret []byte, maxAge time.Duration) *Manager {
 	return &Manager{authSecret: authSecret, maxAge: maxAge}
 }
 
+func (mgr *Manager) CheckToken(tok string) (Token, error) { panic("TODO") }
+
 func (mgr *Manager) IssueMemberToken(id uint) (string, error) {
 	now := time.Now()
 	return mgr.sign(map[string]interface{}{

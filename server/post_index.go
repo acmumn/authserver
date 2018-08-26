@@ -13,7 +13,6 @@ import (
 // PostIndex is the handler for / with the method POST.
 func PostIndex(db *db.DB, mailer *mailer.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// These are all up here, C89 style, because I'm using goto for error handling.
 		var body struct {
 			Redirect string `form:"redirect" json:"redirect" xml:"redirect" binding:"required"`
 			X500     string `form:"x500" json:"x500" xml:"x500" binding:"required"`
@@ -25,6 +24,7 @@ func PostIndex(db *db.DB, mailer *mailer.Client) gin.HandlerFunc {
 				"Error":    err.Error(),
 				"Redirect": body.Redirect,
 			})
+			return
 		}
 
 		id, email, err := db.GetMemberIDAndEmailFromX500(body.X500)
@@ -33,11 +33,13 @@ func PostIndex(db *db.DB, mailer *mailer.Client) gin.HandlerFunc {
 				"Error":    "No such member could be found.",
 				"Redirect": body.Redirect,
 			})
+			return
 		} else if err != nil {
 			log.Error("When querying for member", err)
 			c.HTML(http.StatusNotFound, "error", gin.H{
 				"Error": err.Error(),
 			})
+			return
 		}
 
 		uuid, err := db.NewLoginUUID(id)
@@ -46,6 +48,7 @@ func PostIndex(db *db.DB, mailer *mailer.Client) gin.HandlerFunc {
 			c.HTML(http.StatusNotFound, "error", gin.H{
 				"Error": err.Error(),
 			})
+			return
 		}
 
 		err = mailer.Send("identity", "login", email, "Log In", map[string]interface{}{
@@ -56,6 +59,7 @@ func PostIndex(db *db.DB, mailer *mailer.Client) gin.HandlerFunc {
 			c.HTML(http.StatusNotFound, "error", gin.H{
 				"Error": err.Error(),
 			})
+			return
 		}
 
 		c.HTML(http.StatusOK, "post-index", gin.H{"Email": email})
