@@ -83,7 +83,7 @@ impl<C: 'static + Connect + Sync> Client<C> {
             .header(ACCEPT, mime::APPLICATION_JSON.as_ref())
             .header(ACCEPT_CHARSET, "utf-8")
             .header(CONTENT_TYPE, mime::TEXT_PLAIN.as_ref())
-            .header(COOKIE, format!("TODO={}", self.service_token))
+            .header(COOKIE, format!("auth={}", self.service_token))
             .header(USER_AGENT, UA)
             .body(token.into())
             .context(ErrorKind::InvalidServiceToken(None)); // Theoretically, this is the only
