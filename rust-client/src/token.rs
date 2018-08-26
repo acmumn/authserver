@@ -18,6 +18,9 @@ pub struct Token {
 pub enum ClientData {
     /// A token representing a member.
     Member {
+        /// The member's database ID.
+        id: u32,
+
         /// The member's name.
         name: String,
 
