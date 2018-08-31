@@ -5,6 +5,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	log "github.com/sirupsen/logrus"
 )
 
 type Manager struct {
@@ -16,11 +17,42 @@ func NewManager(authSecret []byte, maxAge time.Duration) *Manager {
 	return &Manager{authSecret: authSecret, maxAge: maxAge}
 }
 
-func (mgr *Manager) CheckToken(tok string) (Token, error) { panic("TODO") }
+func (mgr *Manager) CheckToken(tok string) (Token, error) {
+	token, err := jwt.Parse(tok, func(t *jwt.Token) (interface{}, error) {
+		return mgr.authSecret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+
+	now := time.Now().Unix()
+	if iat, ok := claims["iat"].(int64); ok {
+		if now < iat {
+			return nil, ErrExpired
+		}
+	}
+	if exp, ok := claims["exp"].(int64); ok {
+		if exp < now {
+			return nil, ErrExpired
+		}
+	}
+
+	switch claims["type"] {
+	case "member":
+		return newMemberToken(claims["id"].(uint)), nil
+	case "service":
+		return newServiceToken(claims["name"].(string)), nil
+	default:
+		log.Panicf("Invalid token type %#v", claims["type"])
+		panic("unreachable")
+	}
+}
 
 func (mgr *Manager) IssueMemberToken(id uint) (string, error) {
 	now := time.Now()
-	return mgr.sign(map[string]interface{}{
+	return mgr.sign(jwt.MapClaims{
 		"iat":  now.Unix(),
 		"exp":  now.Add(mgr.maxAge).Unix(),
 		"type": "member",

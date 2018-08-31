@@ -38,6 +38,12 @@ func (db *DB) GetMemberIDAndEmailFromX500(x500 string) (uint, string, error) {
 	panic("TODO")
 }
 
+// GetAndRemoveLoginUUID checks for a login UUID. If it exists, it deletes it and returns the
+// corresponding member ID. Otherwise, it returns sql.ErrNoRows.
+func GetAndRemoveLoginUUID(uuid *uuid.UUID) (uint, error) {
+	panic("TODO")
+}
+
 // NewLoginUUID creates a new login UUID for the member with the given ID, registers it with the
 // database, and returns it.
 func (db *DB) NewLoginUUID(member uint) (uuid.UUID, error) {

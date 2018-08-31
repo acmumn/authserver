@@ -9,6 +9,6 @@ import (
 // GetLogin is the handler for /login/:uuid with the method GET.
 func GetLogin(db *db.DB, toks *token.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO
+		panic("TODO")
 	}
 }

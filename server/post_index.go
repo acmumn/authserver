@@ -14,7 +14,7 @@ import (
 func PostIndex(db *db.DB, mailer *mailer.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body struct {
-			Redirect string `form:"redirect" json:"redirect" xml:"redirect" binding:"required"`
+			Redirect string `form:"redirect" json:"redirect" xml:"redirect"`
 			X500     string `form:"x500" json:"x500" xml:"x500" binding:"required"`
 		}
 
