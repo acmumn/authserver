@@ -9,6 +9,11 @@ import (
 
 type DB struct {
 	conn *sql.DB
+
+	getMemberIdAndEmailFromX500 *sql.Stmt
+	getMemberIdFromUUID         *sql.Stmt
+	deleteUUID                  *sql.Stmt
+	insertUUID                  *sql.Stmt
 }
 
 // Connect opens a connection to the database.
@@ -18,7 +23,27 @@ func Connect(addr string) (*DB, error) {
 		return nil, err
 	}
 
-	return &DB{conn}, nil
+	getMemberIdAndEmailFromX500, err := conn.Prepare("")
+	if err != nil {
+		return nil, err
+	}
+
+	getMemberIdFromUUID, err := conn.Prepare("")
+	if err != nil {
+		return nil, err
+	}
+
+	deleteUUID, err := conn.Prepare("")
+	if err != nil {
+		return nil, err
+	}
+
+	insertUUID, err := conn.Prepare("INSERT INTO ")
+	if err != nil {
+		return nil, err
+	}
+
+	return &DB{conn, getMemberIdAndEmailFromX500, getMemberIdFromUUID, deleteUUID, insertUUID}, nil
 }
 
 // Close closes the connection to the database.
@@ -40,7 +65,7 @@ func (db *DB) GetMemberIDAndEmailFromX500(x500 string) (uint, string, error) {
 
 // GetAndRemoveLoginUUID checks for a login UUID. If it exists, it deletes it and returns the
 // corresponding member ID. Otherwise, it returns sql.ErrNoRows.
-func GetAndRemoveLoginUUID(uuid *uuid.UUID) (uint, error) {
+func GetAndRemoveLoginUUID(uuid uuid.UUID) (uint, error) {
 	panic("TODO")
 }
 
