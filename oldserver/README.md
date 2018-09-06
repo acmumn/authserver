@@ -11,6 +11,7 @@ Configured via either environment variables or a `.env` file. The following envi
 AUTH_SECRET="hunter2" # HS512 secret
 BASE_URL="https://auth.acm.umn.edu" # Base URL for magic links
 DATABASE_URL="mysql://root:password@localhost/acm" # MySQL database URL
+GIN_MODE="release" # Set to enable Gin's release mode
 MAILER_SERVER="https://mail.acm.umn.edu" # The URL of the mailer server to use
 
 # Optional

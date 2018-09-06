@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Error!{% endblock title %}
+
+{% block main %}
+<h1 class="display-4">Error!</h1>
+Please contact an officer (in person or <a href="mailto:acm@umn.edu">via email</a>)
+with the following information:
+<pre>{{ error }}</pre>
+{% endblock main %}

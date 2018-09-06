@@ -3,6 +3,7 @@
 extern crate failure;
 extern crate futures;
 extern crate hyper;
+extern crate identity_common;
 extern crate log;
 extern crate mime;
 extern crate serde;
@@ -25,11 +26,11 @@ use hyper::{
     header::{ACCEPT, ACCEPT_CHARSET, CONTENT_TYPE, COOKIE, USER_AGENT},
     Request, Uri,
 };
+pub use identity_common::{ClientData, Token};
 use url::Url;
 
 pub use errors::{Error, ErrorKind, Result};
 use responses::Validate400Response;
-pub use token::{ClientData, Token};
 
 /// The client.
 pub struct Client<C = HttpConnector> {
