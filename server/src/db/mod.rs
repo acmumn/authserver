@@ -15,7 +15,7 @@ use futures::{
 };
 use tokio_threadpool::blocking;
 
-use db::schema::{mailer_lists, mailer_queue, mailer_templates, mailer_unsubscribes};
+use db::schema::{identity_jwt_escrow, members_members};
 use {Error, ErrorKind, Result};
 
 /// A pool of connections to the database.

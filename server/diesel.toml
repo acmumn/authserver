@@ -1,2 +1,2 @@
 [print_schema.filter]
-only_tables = ["mailer_lists", "mailer_queue", "mailer_templates", "mailer_unsubscribes"]
+only_tables = ["identity_jwt_escrow", "members_members"]

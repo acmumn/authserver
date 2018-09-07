@@ -1,6 +1,7 @@
 //! The web-serving parts.
 
 mod endpoints;
+mod util;
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -24,7 +25,7 @@ use {log_err, web::endpoints::*, DB};
 
 #[derive(Deserialize)]
 struct GetIndexParams {
-    redirect: Option<String>,
+    redirect: String,
 }
 
 /// Returns all the routes.
@@ -87,14 +88,14 @@ pub fn routes(
 
     warp::index()
         .and(warp::get2())
-        .and(warp::query())
-        .and_then(move |params: GetIndexParams| {
-            let redirect = match params.redirect.as_ref() {
-                Some(r) => r,
-                None => "acm.umn.edu",
-            };
-            println!("{:?}", redirect);
-            get_index(None, redirect, render.clone()).map_err(err_handler)
+        .and(util::query_opt())
+        .and_then(move |params: Option<GetIndexParams>| {
+            let redirect = params
+                .unwrap_or_else(|| GetIndexParams {
+                    redirect: "acm.umn.edu".to_string(),
+                })
+                .redirect;
+            get_index(None, &redirect, render.clone()).map_err(err_handler)
         })
         .or(warp::index()
             .and(warp::post2())

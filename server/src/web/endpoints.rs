@@ -34,7 +34,12 @@ pub fn post_index(
     render: Arc<impl Fn(&str, Context) -> Response<String>>,
     db: DB,
 ) -> impl Future<Item = Response<String>, Error = Error> {
-    ok(render("post-index.html", Context::new()))
+    // TODO
+    let email = "foo@bar.com";
+
+    let mut ctx = Context::new();
+    ctx.add("email", &email);
+    ok(render("post-index.html", ctx))
 }
 
 pub fn get_login(uuid: String, db: DB) -> impl Future<Item = Response<String>, Error = Error> {
