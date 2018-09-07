@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use futures::{
-    future::{err, Either},
+    future::{err, ok, Either},
     prelude::*,
 };
 use tera::Context;
@@ -11,9 +11,16 @@ use warp::http::Response;
 use {log_err, Error, ErrorKind, DB};
 
 pub fn get_index(
+    error: Option<&str>,
+    redirect: &str,
     render: Arc<impl Fn(&str, Context) -> Response<String>>,
 ) -> impl Future<Item = Response<String>, Error = Error> {
-    render("get-index.html", Context::new())
+    let mut ctx = Context::new();
+    if let Some(error) = error {
+        ctx.add("error", error);
+    }
+    ctx.add("redirect", redirect);
+    ok(render("get-index.html", ctx))
 }
 
 #[derive(Deserialize)]
@@ -27,15 +34,17 @@ pub fn post_index(
     render: Arc<impl Fn(&str, Context) -> Response<String>>,
     db: DB,
 ) -> impl Future<Item = Response<String>, Error = Error> {
-    render("post-index.html", Context::new())
+    ok(render("post-index.html", Context::new()))
 }
 
 pub fn get_login(uuid: String, db: DB) -> impl Future<Item = Response<String>, Error = Error> {
-    unimplemented!()
+    unimplemented!();
+    ok(Response::new("TODO".to_string()))
 }
 
 pub fn post_validate(token: String, db: DB) -> impl Future<Item = Response<String>, Error = Error> {
-    unimplemented!()
+    unimplemented!();
+    ok(Response::new("TODO".to_string()))
 }
 
 /*

@@ -17,15 +17,20 @@ use warp::{
         status::StatusCode,
         Response,
     },
-    reject, Filter,
+    reject, Filter, Rejection,
 };
 
 use {log_err, web::endpoints::*, DB};
 
+#[derive(Deserialize)]
+struct GetIndexParams {
+    redirect: Option<String>,
+}
+
 /// Returns all the routes.
 pub fn routes(
     db: DB,
-    auth_server_url: Option<Url>,
+    mailer_server_url: Url,
     base_url: Arc<Url>,
 ) -> BoxedFilter<(impl warp::Reply,)> {
     let mut tera = Tera::default();
@@ -75,14 +80,46 @@ pub fn routes(
     let db3 = db.clone();
     let db4 = db.clone();
 
+    fn err_handler<E: Into<::failure::Error>>(err: E) -> Rejection {
+        log_err(err.into());
+        reject::server_error()
+    }
+
     warp::index()
-        .map(move || render("index.html", Context::new()))
+        .and(warp::get2())
+        .and(warp::query())
+        .and_then(move |params: GetIndexParams| {
+            let redirect = match params.redirect.as_ref() {
+                Some(r) => r,
+                None => "acm.umn.edu",
+            };
+            println!("{:?}", redirect);
+            get_index(None, redirect, render.clone()).map_err(err_handler)
+        })
+        .or(warp::index()
+            .and(warp::post2())
+            .and(warp::body::form())
+            .and_then(move |params| {
+                post_index(params, render2.clone(), db.clone()).map_err(err_handler)
+            }))
         .or(path!("main.css").and(warp::index()).map(|| {
             let mut res = Response::new(include_str!("main.css").to_string());
             res.headers_mut()
                 .insert(CONTENT_TYPE, HeaderValue::from_static("text/css"));
             res
         }))
+        .or(path!("status")
+            .and(warp::index())
+            .and(warp::get2())
+            .map(|| {
+                let mut res = Response::new("".to_string());
+                *res.status_mut() = StatusCode::NO_CONTENT;
+                res
+            }))
+        .boxed()
+}
+
+/*
         .or(path!("send")
             .and(warp::index())
             .and(warp::post2())
@@ -92,14 +129,6 @@ pub fn routes(
                     log_err(e.into());
                     reject::server_error()
                 })
-            }))
-        .or(path!("status")
-            .and(warp::index())
-            .and(warp::get2())
-            .map(|| {
-                let mut res = Response::new("".to_string());
-                *res.status_mut() = StatusCode::NO_CONTENT;
-                res
             }))
         .or(path!("template" / u32)
             .and(warp::index())
@@ -143,5 +172,4 @@ pub fn routes(
                     },
                 )
             }))
-        .boxed()
-}
+            */

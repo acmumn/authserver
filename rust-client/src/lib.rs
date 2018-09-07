@@ -14,7 +14,6 @@ extern crate url;
 
 mod errors;
 mod responses;
-mod token;
 
 use failure::{Fail, ResultExt};
 use futures::{

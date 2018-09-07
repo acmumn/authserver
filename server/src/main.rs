@@ -1,29 +1,24 @@
+extern crate acmumn_identity_server as identity;
 extern crate dotenv;
 #[macro_use]
 extern crate failure;
 extern crate futures;
 #[macro_use]
 extern crate log;
-extern crate mailer;
 #[macro_use]
 extern crate structopt;
 extern crate syslog;
 extern crate tokio;
-extern crate tokio_threadpool;
 extern crate url;
 extern crate warp;
 
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::process::exit;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 
 use failure::Error;
-use futures::{Future, Stream};
-use mailer::{log_err, routes, sweep, Mailer, DB};
+use identity::{log_err, routes, DB};
 use structopt::StructOpt;
-use tokio::timer::Interval;
-use tokio_threadpool::ThreadPool;
 use url::Url;
 
 fn main() {
@@ -40,29 +35,12 @@ fn main() {
 fn run(options: Options) -> Result<(), Error> {
     let serve_addr = options.serve_addr()?;
     let db = DB::connect(&options.database_url)?;
-    let mailer = Mailer::new(
-        options.smtp_addr,
-        options.smtp_from,
-        options.smtp_user,
-        options.smtp_pass,
-        options.smtp_reply_to,
-    )?;
 
     let base_url = Arc::new(options.base_url);
-    let routes = routes(db.clone(), options.auth_server, base_url.clone());
+    let routes = routes(db.clone(), options.mailer_server, base_url.clone());
     let server = warp::serve(routes).bind(serve_addr);
 
-    let thread_pool = ThreadPool::new();
-    thread_pool.spawn(server);
-    let sweeper = Interval::new(Instant::now(), Duration::from_secs(5 * 60))
-        .map_err(Error::from)
-        .for_each(move |_| {
-            let fut = sweep(db.clone(), mailer.clone(), base_url.clone());
-            Ok(thread_pool.spawn(fut.map_err(|e| log_err(e.into()))))
-        })
-        .map_err(log_err);
-
-    tokio::run(sweeper);
+    tokio::run(server);
     Ok(())
 }
 
@@ -77,10 +55,6 @@ struct Options {
     #[structopt(short = "v", long = "verbose", parse(from_occurrences))]
     verbose: usize,
 
-    /// The URL of the authentication server to use, if any.
-    #[structopt(short = "a", long = "auth-server", env = "AUTH_SERVER")]
-    auth_server: Option<Url>,
-
     /// The base URL for unsubscribe links and template examples.
     #[structopt(short = "b", long = "base-url", env = "BASE_URL")]
     base_url: Url,
@@ -93,29 +67,13 @@ struct Options {
     #[structopt(short = "h", long = "host", env = "HOST", default_value = "::")]
     host: String,
 
+    /// The URL of the mailer server to use.
+    #[structopt(short = "a", long = "mailer-server", env = "MAILER_SERVER")]
+    mailer_server: Url,
+
     /// The port to serve on.
     #[structopt(short = "p", long = "port", env = "PORT", default_value = "8000")]
     port: u16,
-
-    /// The SMTP server to use.
-    #[structopt(long = "smtp-addr", env = "SMTP_ADDR", default_value = "smtp.gmail.com")]
-    smtp_addr: String,
-
-    /// The SMTP From header to use.
-    #[structopt(long = "smtp-from", env = "SMTP_FROM")]
-    smtp_from: String,
-
-    /// The SMTP username to use.
-    #[structopt(long = "smtp-user", env = "SMTP_USER")]
-    smtp_user: String,
-
-    /// The SMTP password to use.
-    #[structopt(long = "smtp-pass", env = "SMTP_PASS")]
-    smtp_pass: String,
-
-    /// The SMTP Reply-To header to use.
-    #[structopt(long = "smtp-reply-to", env = "SMTP_REPLY_TO")]
-    smtp_reply_to: Option<String>,
 
     /// The syslog server to send logs to.
     #[structopt(short = "s", long = "syslog-server", env = "SYSLOG_SERVER")]
@@ -148,17 +106,13 @@ impl Options {
             let r = if let Some(ref server) = self.syslog_server {
                 syslog::init_tcp(
                     server,
-                    "mail.acm.umn.edu".to_string(),
+                    "identity".to_string(),
                     syslog::Facility::LOG_DAEMON,
                     log_level,
                 )
             } else {
                 // rifp https://github.com/Geal/rust-syslog/pull/38
-                syslog::init(
-                    syslog::Facility::LOG_DAEMON,
-                    log_level,
-                    Some("mail.acm.umn.edu"),
-                )
+                syslog::init(syslog::Facility::LOG_DAEMON, log_level, Some("identity"))
             };
 
             if let Err(err) = r {
