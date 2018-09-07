@@ -5,10 +5,10 @@ name = "acmumn-identity-client"
 version = "0.1.0"
 
 [dependencies]
+acmumn-identity-common = { path = "../rust-common" }
 failure = "0.1.2"
 futures = "0.1.23"
 hyper = "0.12.8"
-identity-common = { path = "../rust-common" }
 log = "0.4.4"
 mime = "0.3.9"
 serde = "1.0.75"

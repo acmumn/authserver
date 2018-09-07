@@ -1,5 +1,5 @@
 [package]
-name = "identity-common"
+name = "acmumn-identity-common"
 version = "0.1.0"
 authors = ["Nathan Ringo <remexre@gmail.com>"]
 

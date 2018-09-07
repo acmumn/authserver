@@ -1,9 +1,9 @@
 //! A Rust client for the identity service.
+extern crate acmumn_identity_common;
 #[macro_use]
 extern crate failure;
 extern crate futures;
 extern crate hyper;
-extern crate identity_common;
 extern crate log;
 extern crate mime;
 extern crate serde;
@@ -15,6 +15,7 @@ extern crate url;
 mod errors;
 mod responses;
 
+pub use acmumn_identity_common::{ClientData, Token};
 use failure::{Fail, ResultExt};
 use futures::{
     future::{err, Either},
@@ -25,7 +26,6 @@ use hyper::{
     header::{ACCEPT, ACCEPT_CHARSET, CONTENT_TYPE, COOKIE, USER_AGENT},
     Request, Uri,
 };
-pub use identity_common::{ClientData, Token};
 use url::Url;
 
 pub use errors::{Error, ErrorKind, Result};

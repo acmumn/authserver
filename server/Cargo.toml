@@ -5,11 +5,11 @@ name = "acmumn-identity-server"
 version = "0.1.0"
 
 [dependencies]
+acmumn-identity-common = { path = "../rust-common" }
 diesel = { version = "1.3.2", default_features = false, features = ["mysql", "r2d2", "serde_json"] }
 dotenv = "0.13.0"
 failure = "0.1.1"
 futures = "0.1.24"
-identity-common = { path = "../rust-common" }
 lazy_static = "1.1.0"
 log = "0.4.3"
 serde = "1.0.74"
